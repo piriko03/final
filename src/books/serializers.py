@@ -1,15 +1,18 @@
 from rest_framework import serializers
 from .models import Author, Genre, Book, BookRequest
 
+
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Author
         fields = '__all__'
 
+
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
         fields = '__all__'
+
 
 class BookSerializer(serializers.ModelSerializer):
     authors = AuthorSerializer(many=True, read_only=True)
@@ -38,8 +41,15 @@ class BookSerializer(serializers.ModelSerializer):
         book.genres.set(genre_ids)
         return book
 
+
 class BookRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = BookRequest
-        fields = '__all__'
+        fields = ['id', 'book', 'requester', 'status', 'message', 'created_at', 'updated_at']
         read_only_fields = ('requester', 'status')
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['book_title'] = instance.book.title
+        representation['requester_email'] = instance.requester.email
+        return representation

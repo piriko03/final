@@ -7,9 +7,11 @@ class User(AbstractUser):
         db_table = 'user'
 
     email = models.EmailField(unique=True)
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=30)
+    age = models.IntegerField(null=True)
     location = models.TextField(null=True, blank=True)
 
-    # Fix reverse accessor conflicts
     groups = models.ManyToManyField(
         'auth.Group',
         related_name='custom_user_set',
@@ -26,7 +28,7 @@ class User(AbstractUser):
     )
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     def __str__(self):
         return self.email

@@ -1,13 +1,10 @@
 from django.db import models
-
-from books.models.Book import Book
-from users.models import User
+from rest_framework.exceptions import ValidationError
 
 
 class BookRequest(models.Model):
     class Meta:
         db_table = 'book_request'
-        unique_together = ['book', 'requester']
 
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -15,10 +12,13 @@ class BookRequest(models.Model):
         ('rejected', 'Rejected'),
     ]
 
-    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='requests')
-    requester = models.ForeignKey(User, on_delete=models.CASCADE, related_name='book_requests')
+    book = models.ForeignKey('Book', on_delete=models.CASCADE, related_name='requests')
+    requester = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='book_requests')
+    message = models.TextField(null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    message = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def clean(self):
+        if self.book.status != 'available':
+            raise ValidationError("This book is not available for requests")
